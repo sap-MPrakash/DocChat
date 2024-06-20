@@ -1,12 +1,10 @@
 import MaxWidthWrapper from "./MaxWidthWrapper"
 import Link from "next/link"
 import { buttonVariants } from "./ui/button"
-import { getAuthSession } from "@/lib/auth"
 import { LoginLink, RegisterLink } from "@kinde-oss/kinde-auth-nextjs/server"
 import { cn } from "@/lib/utils"
 import { ArrowRight } from "lucide-react"
 async function NavBar () {
-    const session = await getAuthSession()
   return (
     <nav className="sticky h-15 rounded inset-x-0 top-1 ml-2 mr-2 z-30 w-auto bg-white/5 backdrop-blur-lg transition-all">
         <MaxWidthWrapper>
