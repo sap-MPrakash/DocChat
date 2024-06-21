@@ -17,7 +17,7 @@ const  UploadButton: React.FC = () => {
             </DialogTrigger>
 
             <DialogContent>
-                Upload
+                Upload PDF
             </DialogContent>
         </Dialog>
     )
