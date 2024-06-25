@@ -2,7 +2,7 @@
 import { FC, useState } from "react"
 import Skeleton from 'react-loading-skeleton'
 import { trpc } from "@/app/_trpc/client"
-import { Ghost, Plus, MessageSquare, Trash } from "lucide-react"
+import { Ghost, Plus, MessageSquare, Trash, Loader2 } from "lucide-react"
 import UploadButton from "./UploadButton"
 import {format} from "date-fns"
 import Link from "next/link"
@@ -15,15 +15,17 @@ const Dashboard: FC  = () => {
 
     const {data: files, isLoading} = trpc.getUserFiles.useQuery(undefined)
 
-    const mutation = trpc.deleteFile.useMutation()
-    if(mutation.isSuccess){
-        utils.getUserFiles.invalidate()
-    }
-
-    const deleteFile = mutation.mutate
-
-
-
+    const {mutate: deleteFile} = trpc.deleteFile.useMutation({
+        onSuccess: () =>{
+            utils.getUserFiles.invalidate();
+        },
+        onMutate({id}){
+            setCurrentlyDeletingFile(id)
+        },
+        onSettled(){
+            setCurrentlyDeletingFile(null)
+        }
+    })
 
     return(
         <main className="mx-auto p-4 max-w-7xl md:p-10">
@@ -38,7 +40,7 @@ const Dashboard: FC  = () => {
                     {files.sort((a,b) => new Date(b.createdAt).getTime()
                                         - new Date(a.createdAt).getTime())
                             .map((file)=>(
-                                <li key={file.id} className="col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow transition hover:shadow-lg">
+                                <li key={file.id} className="col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow transition hover:shadow-xl hover:shadow-zinc-800">
                                     
                                     {/* file name and link */}
                                     <Link href={`/dashboard/${file.id}`} className="flex flex-col gap-2">
@@ -53,7 +55,7 @@ const Dashboard: FC  = () => {
                                     </Link>
 
                                     {/* file upload date */}
-                                    <div className="px-6 mt-4 grid grid-cols-3 place-items-center py-2 gap-6 text-xs text-zinc-500">
+                                    <div className="px-6 mt-4 grid grid-cols-3 place-items-center py-2 gap-6 text-xs text-zinc-500 ">
                                         <div className="flex items-center gap-2">
                                             <Plus className="h-4 w-4 text-black"/>
                                                 {format(new Date(file.createdAt), "yyyy-MM-dd")}    
@@ -65,7 +67,9 @@ const Dashboard: FC  = () => {
                                         </div>
 
                                         <Button onClick={()=> deleteFile({id: file.id})} size='sm' className="w-full" variant='destructive'>
-                                            <Trash className="h-4 w-4"/>
+                                            {currentlyDeletingFile === file.id ? (<Loader2 className="h-w w-4 animate-spin"/>) :
+                                                 <Trash className="h-4 w-4"/>
+                                            }
                                         </Button>
                                     </div>
 
